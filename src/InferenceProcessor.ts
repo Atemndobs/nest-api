@@ -95,22 +95,7 @@ async function initTensorflowWASM(name) {
     }
 }
 
-
-/*export async function outputPredictions(p = null) {
-    console.log({OUTPUT_PRED___: pred})
-
-
-    if (Object.keys(pred).length != 0){
-        const res = await p ?? pred
-        return {
-            predictions: res
-        };
-    }
-
-}*/
-
 export function outputPredictions() {
-  //  console.log({OUTPUT_PRED___: pred})
      return {
         predictions: pred
     };
@@ -140,20 +125,8 @@ async function modelPredict(features, name) {
         const newModel = await new EssentiaModel.TensorflowMusiCNN(tf, getModelURL(name));
 
         await newModel.initialize()
-/*        console.log({
-            modelReady: modelReady,
-            modelLoaded : modelLoaded,
-            modelName : name
-        })*/
-
         await newModel.predict(features, true).then((predictions) => {
-
-/*            console.log({
-                modelName : name,
-                modelTagOrder_0 : modelTagOrder[name][0],
-                modelTagOrder_1 : modelTagOrder[name][1]
-            })*/
-
+            
             const summarizedPredictions = twoValuesAverage(predictions);
             // format predictions, grab only positive one
             const results = summarizedPredictions.filter((_, i) => modelTagOrder[name][i])[0];
@@ -192,7 +165,6 @@ export async function inferenceProcessor(data) {
         return res;
     }
 }
-
 
 
 function dd(msg = null){

@@ -8,6 +8,7 @@ import * as jsDom from 'jsdom'
 import { StreamAudioContext as AudioContext, encoder, RenderingAudioContext, OfflineAudioContext } from 'web-audio-engine';
 import * as wae from 'web-audio-engine';
 import * as mp3decoder from 'audio-decode'
+// import {createParsedTrack} from "./MainProcess/core/createParsedTrack";
 //import { AudioContext , AudioBuffer} from 'web-audio-api';
 import { Worker } from "worker_threads";
 

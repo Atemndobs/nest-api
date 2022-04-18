@@ -7,11 +7,12 @@ import * as fs from 'fs';
 import {PythonShell} from 'python-shell';
 import axios from 'axios';
 import * as url from "url";
-
+import {createParsedTrack} from "./MainProcess/core/createParsedTrack";
 
 @Injectable()
 export class AppService {
   getHello(): string {
+    return 'Hello Danm!';
     return 'Hello Danm!';
   }
 
@@ -19,7 +20,6 @@ export class AppService {
         Object.keys(require.cache).forEach(function(key) { delete require.cache[key] })
         return {status: 'Working !!'}
     }
-
  async getClassifier(track : string) : Promise <any> {
    return await this.getSongByTitle(track).then((res) => {
 
@@ -36,14 +36,15 @@ export class AppService {
                newUrl.on('message', function (message) {
                    if (message.toString().includes('wav')){
                        let checked_path =  message
+
                        if (fs.existsSync(checked_path)) {
                            let pred = analyzeMp3(checked_path, id)
 
                            let originalFile = `./src/audio/${track}`
-                           console.log('AFTRER CONVERT')
                            self.deleteMp3(originalFile)
 
                            return pred;
+
                        }else {
                            return 'PROCESS FAILED'
                        }
@@ -76,6 +77,7 @@ export class AppService {
           url: `http://127.0.0.1:8899/api/classify/song/?title=${track}`,
           headers: { }
       };
+      let self = this
       // @ts-ignore
       return axios(config)
           .then(function (response) {
@@ -100,33 +102,34 @@ export class AppService {
         }
 
         let wav ;
-       let self = this
-        return  PythonShell.run('./src/convert.py', options, function (err, res) {
+        let self = this
+
+        return PythonShell.run('./src/convert.py', options, function (err, res) {
 
             if (err) {
-                console.log(err);
+                console.log({err});
             }else {
                 console.log(`succefully converted ${mp3File} to ${mp3}.wav`);
                 let wavFile = `${mp3}.wav`
                 wav = `./src/audio/${mp3}.wav`
 
                 let originalFile = `./src/audio/${mp3File}`
-                console.log('AFTRER CONVERT')
-                self.deleteMp3(originalFile)
-                console.log({wav})
             }
-
             return wav
-        });
+        })
 
   }
-    deleteMp3(file) {
 
-        let rmFile =  fs.unlink(file, (err) => {
+    async  deleteMp3(file) {
+
+      let trackDetails = await createParsedTrack(file)
+
+        console.log({trackDetails})
+        let rmFile = await fs.unlink(file, (err) => {
             if (err) throw err;
         });
 
-        return rmFile
+        return trackDetails
     }
   
     checkFileType(traclUrl) {
@@ -156,6 +159,10 @@ export class AppService {
             }
         });
         return rmDir
+    }
+
+    getSongProperties( file : any) : any {
+      return createParsedTrack(file)
     }
 }
 
