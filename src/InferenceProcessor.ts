@@ -57,8 +57,8 @@ function getModelURL(name) {
     //    let file_path = pathToFileURL(`./src/models/${name}-musicnn-msd-2/model.json`)
     //'file:///home/atem/sites/curator/nested/src/models/mood_happy-musicnn-msd-2/model.json'
 // http://mage.tech:8899/storage/models/danceability-musicnn-msd-2/model.json
- //   let essentai_path = `https://mtg.github.io/essentia.js/examples/demos/mood-classifiers/models/${name}-musicnn-msd-2/model.json`
-    let essentai_path = `http://mage.tech:8899/storage/models/${name}-musicnn-msd-2/model.json`
+    let essentai_path = `https://mtg.github.io/essentia.js/examples/demos/mood-classifiers/models/${name}-musicnn-msd-2/model.json`
+   // let essentai_path = `http://mage.tech:8899/storage/models/${name}-musicnn-msd-2/model.json`
     return essentai_path;
 }
 
