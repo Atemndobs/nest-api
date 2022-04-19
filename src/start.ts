@@ -20,7 +20,6 @@ import ffmpeg from 'fluent-ffmpeg'
 
 
 import * as NodeLame from 'node-lame'
-// const Lame = NodeLame.Lame;
 
 import Mp32Wav from 'mp3-to-wav'
 import path from 'path'

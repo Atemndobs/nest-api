@@ -41,7 +41,7 @@ export class AppService {
                            let pred = analyzeMp3(checked_path, id)
 
                            let originalFile = `./src/audio/${track}`
-                           self.deleteMp3(originalFile)
+                           self.deleteMp3(originalFile, id)
 
                            return pred;
 
@@ -120,11 +120,11 @@ export class AppService {
 
   }
 
-    async  deleteMp3(file) {
+    async  deleteMp3(file, id) {
 
       let trackDetails = await createParsedTrack(file)
+        this.updateSongProperties(trackDetails, id)
 
-        console.log({trackDetails})
         let rmFile = await fs.unlink(file, (err) => {
             if (err) throw err;
         });
@@ -161,8 +161,33 @@ export class AppService {
         return rmDir
     }
 
-    getSongProperties( file : any) : any {
-      return createParsedTrack(file)
+    updateSongProperties( file : any, id : bigint) : any {
+        let data = {
+            author : file.artist,
+            image  : file.albumArt,
+            comment : file.extractedTitle
+
+        };
+
+      //  dd(data)
+
+        let url =  "http://localhost:8899/api/songs/"+id
+
+    /*   let  config = {
+            method: 'put',
+            url: url,
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: data
+        };*/
+
+      return axios.put(url, {data}).then((res) => {
+
+      }).catch((err) => {
+          console.log(err.message)
+      })
     }
 }
 
