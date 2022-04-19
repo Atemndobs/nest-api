@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as fs from 'fs'
+import axios from "axios";
 
 @Injectable()
 export class MusicService {
@@ -22,6 +23,22 @@ export class MusicService {
             }
         });
         return deleteSongs
+    }
+
+    updateSongProperties( file : any, id : bigint) : any {
+        let data = {
+            author : file.artist ?? file.extractedTitle,
+            image  : file.albumArt,
+            comment : file.fileName
+
+        };
+        let url =  "http://localhost:8899/api/songs/"+id
+
+        return axios.put(url, {data}).then((res) => {
+
+        }).catch((err) => {
+            console.log(err.message)
+        })
     }
 
 }

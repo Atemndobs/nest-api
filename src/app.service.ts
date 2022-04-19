@@ -168,20 +168,7 @@ export class AppService {
             comment : file.extractedTitle
 
         };
-
-      //  dd(data)
-
         let url =  "http://localhost:8899/api/songs/"+id
-
-    /*   let  config = {
-            method: 'put',
-            url: url,
-            headers: {
-                'accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            data: data
-        };*/
 
       return axios.put(url, {data}).then((res) => {
 

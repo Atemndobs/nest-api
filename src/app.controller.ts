@@ -2,7 +2,11 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 import Mp32Wav from 'mp3-to-wav'
 import * as stream from "stream";
+import * as http from "http";
 
+import axios from "axios";
+import fs from "fs"
+import {createParsedTrack} from "./MainProcess/core/createParsedTrack";
 
 @Controller('song')
 export class AppController {
@@ -38,7 +42,6 @@ export class AppController {
       prediction.track = track
       return await prediction;
   }
-
 
     dd(msg = null){
         console.info({

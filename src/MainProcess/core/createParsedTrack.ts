@@ -46,11 +46,14 @@ export function createParsedTrack(
                     `${removeMIME(track.fileName)}.${tags.image.mime}`
                 );
 
-                writeImageBuffer(tags.image.imageBuffer, albumArtPath)
-                track.albumArt = albumArtPath
+                let imagePath = './src/images/' + albumArtPath
+                writeImageBuffer(tags.image.imageBuffer, imagePath)
+                track.albumArt = imagePath
                 // track.albumArt = `data:${tags.image.mime
                 // 	};base64,${tags.image.imageBuffer.toString("base64")}`;
                 //code to write image
+
+
             }
             track.title = tags.title;
             track.extractedTitle = extractTitleAndArtist(track.fileName).title;
