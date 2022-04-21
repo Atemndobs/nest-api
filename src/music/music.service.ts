@@ -27,8 +27,8 @@ export class MusicService {
 
     updateSongProperties( file : any, id : bigint) : any {
         let data = {
-            author : file.artist ?? file.extractedTitle,
-            image  : file.albumArt,
+            author : file.artist ?? file.title ?? file.extractedArtist ?? file.extractedTitle ??file.defaultTitle,
+            image  : file.albumArt ,
             comment : file.fileName
 
         };

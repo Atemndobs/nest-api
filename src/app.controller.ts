@@ -42,14 +42,13 @@ export class AppController {
       prediction.track = track
       return await prediction;
   }
+}
 
-    dd(msg = null){
-        console.info({
-            msg : msg,
-        })
+function dd(msg = null){
+    console.info({
+        msg : msg,
+    })
 
-        console.log('*+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-        return  process.exit(0);
-    }
-
+    console.log('*+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+    return  process.exit(0);
 }

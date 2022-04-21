@@ -124,6 +124,8 @@ export class AppService {
 
       let trackDetails = await createParsedTrack(file)
         this.updateSongProperties(trackDetails, id)
+        console.log('BEFORE UPDATING SONG TO DB')
+        console.log({trackDetails})
 
         let rmFile = await fs.unlink(file, (err) => {
             if (err) throw err;
@@ -163,12 +165,15 @@ export class AppService {
 
     updateSongProperties( file : any, id : bigint) : any {
         let data = {
-            author : file.artist,
+            author : file.artist ?? file.extractedArtist ?? file.extractedTitle ??file.defaultTitle,
             image  : file.albumArt,
             comment : file.extractedTitle
 
         };
         let url =  "http://localhost:8899/api/songs/"+id
+
+        console.log('BEFORE POST')
+        console.log(data)
 
       return axios.put(url, {data}).then((res) => {
 

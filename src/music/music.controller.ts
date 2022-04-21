@@ -1,9 +1,10 @@
-import {Body, Controller, Get, Param, Post, Query} from '@nestjs/common';
+import {Body, Controller, Get, Param, Post, Query, Res} from '@nestjs/common';
 import {MusicService} from "./music.service";
 import fs from "fs";
 import http from "http";
 import {createParsedTrack} from "../MainProcess/core/createParsedTrack";
 import axios from "axios";
+import {Observable, of} from "rxjs";
 
 
 @Controller('music')
@@ -28,10 +29,11 @@ export class MusicController {
         };
     }
 
-
     @Get('update')
     updateTrack(@Query() query) {
         let url = 'http://mage.tech:8899/api/songs/'+ query.id
+
+        console.log({query})
 
         let self = this
 
@@ -79,29 +81,20 @@ export class MusicController {
         }
     }
 
-    @Get('image')
-    getImage(@Query() query){
-        console.log(query)
+    @Get(':image')
+    getImage(@Param('image') image, @Res() res) : Observable<object> {
+        let file_path = './src/images/' + image
 
-        let file_path = './src/images/' + query.title
-
-/*
-        let image = fs.readFile(file_path, function (err, content) {
-            return buffer
-        })
-*/
-
-    //   let path = fs.readFileSync(file_path)
-        return fs.createReadStream(file_path)
+        let imagePath = fs.realpathSync(file_path)
+        return of(res.sendFile(imagePath ))
     }
+}
 
+function dd(msg = null){
+    console.info({
+        msg : msg,
+    })
 
-    dd(msg = null){
-        console.info({
-            msg : msg,
-        })
-
-        console.log('*+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-        return  process.exit(0);
-    }
+    console.log('*+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+    return  process.exit(0);
 }
