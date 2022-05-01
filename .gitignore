@@ -4,5 +4,5 @@ dist
 dist_old
 --name
 /src/audio/
-/src/images/
+# /src/images/
 /src/img/
