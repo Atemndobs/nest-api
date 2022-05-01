@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as fs from 'fs'
 import axios from "axios";
+import * as sckey from "soundcloud-key-fetch"
+import * as SoundCloud from "soundcloud-scraper"
 
 @Injectable()
 export class MusicService {
@@ -39,6 +41,41 @@ export class MusicService {
         }).catch((err) => {
             console.log(err.message)
         })
+    }
+
+    async getSoundCloudSong() : Promise<any>{
+
+        const key = await sckey.fetchKey();
+        const test = await sckey.testKey(key);
+        //        // sckey.fetchKey().then(key => {
+        //         //     console.log(key)
+        //         // });
+        //
+        //         let key = 'V7svIpMdrs2xmRhQStZz66WxBo0YqVqe'
+
+        if (test) {
+            return key
+        }
+    }
+
+    scrapeSoundCloudSong(url = "https://soundcloud.com/dogesounds/alan-walker-feat-k-391-ignite") {
+        const client = new SoundCloud.Client('V7svIpMdrs2xmRhQStZz66WxBo0YqVqe');
+        const fs = require("fs");
+
+        let client_id='V7svIpMdrs2xmRhQStZz66WxBo0YqVqe'
+
+        client.getSongInfo(url)
+            .then(async song => {
+                const stream = await song.downloadProgressive();
+
+                const writer = stream.pipe(fs.createWriteStream( `./src/audio/${song.title}.mp3`));
+                writer.on("finish", () => {
+                    console.log("Finished writing song!")
+                    console.log(song.title)
+                    process.exit(1);
+                });
+            })
+            .catch(console.error);
     }
 
 }

@@ -47,11 +47,11 @@ var ClassifierRequest = /** @class */ (function () {
     ClassifierRequest.prototype.preparePayload = function (payload) {
         return JSON.stringify({
             "data": {
-                //  "author": "Author",
-                "key": payload.key,
-                "bpm": payload.bpm,
-                "scale": payload.scale,
-                "energy": payload.energy,
+                 // "author": "Author",
+                // "key": payload.key,
+                // "bpm": payload.bpm,
+                // "scale": payload.scale,
+                // "energy": payload.energy,
                 "analyzed": true,
                 'status': 'analyzed',
                 "danceability": payload.danceability,

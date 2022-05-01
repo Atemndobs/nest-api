@@ -138,14 +138,22 @@ async function decodeArrayBuffer(arrayBuffer) {
         await audioCtx.suspend();
 
         if (essentia) {
-            let essentiaAnalysis = await computeKeyBPM(arrayBuffer);
+            // let essentiaAnalysis = await computeKeyBPM(arrayBuffer);
+            // // @ts-ignore
+            // finshedPredictions.bpm = essentiaAnalysis.bpm
+            // // @ts-ignore
+            // finshedPredictions.key = essentiaAnalysis.keyData.key
+            // // @ts-ignore
+            // finshedPredictions.scale = essentiaAnalysis.keyData.scale
+            // finshedPredictions.energy = essentiaAnalysis.energy
+
             // @ts-ignore
-            finshedPredictions.bpm = essentiaAnalysis.bpm
+            finshedPredictions.bpm = 0
             // @ts-ignore
-            finshedPredictions.key = essentiaAnalysis.keyData.key
+            finshedPredictions.key = 0
             // @ts-ignore
-            finshedPredictions.scale = essentiaAnalysis.keyData.scale
-            finshedPredictions.energy = essentiaAnalysis.energy
+            finshedPredictions.scale = 0
+            finshedPredictions.energy = 0
         }
 
         // reduce amount of audio to analyse

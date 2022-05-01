@@ -7,6 +7,7 @@ import axios from "axios";
 import {Observable, of} from "rxjs";
 
 
+
 @Controller('music')
 export class MusicController {
     constructor(
@@ -14,9 +15,14 @@ export class MusicController {
     ) {}
 
     @Get()
-    getAll() : any {
+    async getAll() {
+
+        let key = await this.musicService.getSoundCloudSong().then((res) => {
+            return res;
+        })
         return [{
-            id : 'Track 1'
+            id : 'Track 1',
+            key
         }]
     }
 
@@ -81,6 +87,20 @@ export class MusicController {
         }
     }
 
+
+
+    @Get('soundcloud')
+    getSoundCloud(@Query() query) {
+
+        let url = query.song
+        this.musicService.scrapeSoundCloudSong(url)
+
+        return {
+            status : 'Done',
+            url
+        };
+    }
+
     @Get(':image')
     getImage(@Param('image') image, @Res() res) : Observable<object> {
         let file_path = './src/images/' + image
@@ -88,6 +108,7 @@ export class MusicController {
         let imagePath = fs.realpathSync(file_path)
         return of(res.sendFile(imagePath ))
     }
+
 }
 
 function dd(msg = null){

@@ -74,7 +74,7 @@ export class AppService {
     getSongByTitle(track) : Promise<any> {
       var config = {
           method: 'get',
-          url: `http://127.0.0.1:8899/api/classify/song/?title=${track}`,
+          url: `http://127.0.0.1:8899/api/classify/song/?slug=${track}`,
           headers: { }
       };
       let self = this
