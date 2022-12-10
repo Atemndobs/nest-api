@@ -63,7 +63,7 @@ export class MusicController {
                                 console.log(song)
                                 let track =  self.musicService.updateSongProperties(song, id)
 
-                                console.log("=====RESOLVE findAllBank=====")
+                                console.log("=====RESOLVE find All Bank=====")
                                 resolve(track)
                                 return track
                             })
@@ -76,7 +76,7 @@ export class MusicController {
 
                     });
 
-                    console.log('RESTUM ')
+                    console.log('RESUME ')
                     return request
                 }).catch((err) => {
                     console.log(err.message)

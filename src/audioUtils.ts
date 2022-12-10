@@ -1,7 +1,3 @@
-// import pkg from 'tone';
-// const { ToneAudioBuffer } = pkg;
-import {ToneAudioBuffer} from 'tone'
-
 function preprocess (audioBuffer) {
 
     const mono = monomix(audioBuffer);

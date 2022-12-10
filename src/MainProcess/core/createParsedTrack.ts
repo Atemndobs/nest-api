@@ -49,7 +49,7 @@ export function createParsedTrack(
                 let imagePath = './src/images/' + albumArtPath
                 writeImageBuffer(tags.image.imageBuffer, imagePath)
 
-                let imageUrl = 'http://127.0.0.1:3000/music/'+albumArtPath
+                let imageUrl = 'http://mage.tech:3000/music/'+albumArtPath
                 track.albumArt = imageUrl
                 // track.albumArt = `data:${tags.image.mime
                 // 	};base64,${tags.image.imageBuffer.toString("base64")}`;

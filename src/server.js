@@ -28,7 +28,7 @@ const server = createServer((req, res) => {
 
     const {search = 'php', location = 'dusseldorf', country = 'de'} = decodedParams;
 
-    const staticURL = `http://127.0.0.1:5500/src/audio/${search}`;
+    const staticURL = `http://mage.tech:5500/src/audio/${search}`;
 
     console.log(chalk.green(search));
 

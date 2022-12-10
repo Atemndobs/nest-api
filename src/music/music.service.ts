@@ -58,12 +58,16 @@ export class MusicService {
         }
     }
 
-    scrapeSoundCloudSong(url = "https://soundcloud.com/dogesounds/alan-walker-feat-k-391-ignite") {
-        const client = new SoundCloud.Client('V7svIpMdrs2xmRhQStZz66WxBo0YqVqe');
+    scrapeSoundCloudSong(url = "https://soundcloud.com/tera-kora/bewareofmibumpa") {
+
+        // qAMlSnK5vTFKGJJcub5ud5wWTnVPj1iy
+        const client = new SoundCloud.Client('qAMlSnK5vTFKGJJcub5ud5wWTnVPj1iy');
         const fs = require("fs");
 
         let client_id='V7svIpMdrs2xmRhQStZz66WxBo0YqVqe'
 
+        console.log(url)
+        console.log("Downloading song from SoundCloud..." )
         client.getSongInfo(url)
             .then(async song => {
                 const stream = await song.downloadProgressive();
@@ -76,6 +80,8 @@ export class MusicService {
                 });
             })
             .catch(console.error);
+
+        console.log("Downloading...done")
     }
 
 }

@@ -47,7 +47,7 @@ var ClassifierRequest = /** @class */ (function () {
     ClassifierRequest.prototype.preparePayload = function (payload) {
         return JSON.stringify({
             "data": {
-                 // "author": "Author",
+                // "author": "Author",
                 // "key": payload.key,
                 // "bpm": payload.bpm,
                 // "scale": payload.scale,
@@ -86,8 +86,10 @@ var ClassifierRequest = /** @class */ (function () {
                         };
                         // @ts-ignore
                         return [4 /*yield*/, (0, node_fetch_1["default"])("http://localhost:8899/api/songs", requestOptions)
-                                .then(function (response) { return response.text(); })
-                                .then(function (result) {
+                            .then(function (response) {
+                                console.log(response);
+                                return response.text(); })
+                            .then(function (result) {
                                 // console.log(result)
                                 return result;
                             })["catch"](function (error) { return console.log('error', error); })];
@@ -104,11 +106,11 @@ var ClassifierRequest = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, (0, node_fetch_1["default"])(file)
-                            .then(function (response) {
+                        .then(function (response) {
                             return response.status;
                         })["catch"](function (e) {
-                            console.log(e);
-                        })];
+                        console.log(e);
+                    })];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -117,6 +119,9 @@ var ClassifierRequest = /** @class */ (function () {
         });
     };
     ClassifierRequest.prototype.updateSong = function (payload) {
+
+        dd(['WE ARE HERE', payload]);
+
         return __awaiter(this, void 0, void 0, function () {
             var axios, data, id, config;
             return __generator(this, function (_a) {
@@ -135,12 +140,12 @@ var ClassifierRequest = /** @class */ (function () {
                             data: data
                         };
                         return [4 /*yield*/, axios(config)
-                                .then(function (response) {
+                            .then(function (response) {
                                 return response.data;
                                 console.log(JSON.stringify(response.data));
                             })["catch"](function (error) {
-                                console.log(error);
-                            })];
+                            console.log(error);
+                        })];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];

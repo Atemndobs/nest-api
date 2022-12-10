@@ -22,7 +22,6 @@ export class AppService {
     }
  async getClassifier(track : string) : Promise <any> {
    return await this.getSongByTitle(track).then((res) => {
-
        let id = res.id
        let path = res.path
        let url = path
@@ -74,7 +73,7 @@ export class AppService {
     getSongByTitle(track) : Promise<any> {
       var config = {
           method: 'get',
-          url: `http://127.0.0.1:8899/api/classify/song/?slug=${track}`,
+          url: `http://mage.tech:8899/api/classify/song/?slug=${track}`,
           headers: { }
       };
       let self = this
@@ -103,7 +102,6 @@ export class AppService {
 
         let wav ;
         let self = this
-
         return PythonShell.run('./src/convert.py', options, function (err, res) {
 
             if (err) {

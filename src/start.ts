@@ -1,36 +1,26 @@
-import { preprocess, shortenAudio, downsampleArray } from './audioUtils';
-import ClassifierRequest from './ClassifierRequest'
+import {preprocess, shortenAudio, downsampleArray} from './audioUtils';
+import ClassifierRequest from 'src/ClassifierRequest'
 import fetch from 'node-fetch';
 import * as fs from 'fs';
 import * as wav from 'node-wav';
-import * as esLib from 'essentia.js';
 import * as jsDom from 'jsdom'
-import { StreamAudioContext as AudioContext, encoder, RenderingAudioContext, OfflineAudioContext } from 'web-audio-engine';
-import * as wae from 'web-audio-engine';
-import * as mp3decoder from 'audio-decode'
-// import {createParsedTrack} from "./MainProcess/core/createParsedTrack";
-//import { AudioContext , AudioBuffer} from 'web-audio-api';
-import { Worker } from "worker_threads";
+import {
+    StreamAudioContext as AudioContext,
+    encoder,
+    RenderingAudioContext,
+    OfflineAudioContext
+} from 'web-audio-engine';
 
 import {extraxtFeatures} from './Extraction'
 import {inferenceProcessor, outputPredictions} from './InferenceProcessor'
 
 import {EssentiaWASM, EssentiaModel, Essentia, EssentiaExtractor} from 'essentia.js'
-import ffmpeg from 'fluent-ffmpeg'
-
-
-import * as NodeLame from 'node-lame'
-
-import Mp32Wav from 'mp3-to-wav'
-import path from 'path'
-
 
 const audioCtx = new AudioContext()
 const context = new RenderingAudioContext()
 
 
-
-const { JSDOM } = jsDom;
+const {JSDOM} = jsDom;
 
 const KEEP_PERCENTAGE = 0.15; // keep only 15% of audio file
 
@@ -39,14 +29,14 @@ const essentia = new Essentia(EssentiaWASM);
 //let essentiaAnalysis;
 let featureExtractionWorker = null;
 let inferenceWorkers = {};
-const modelNames = ['mood_happy' , 'mood_sad', 'mood_relaxed', 'mood_aggressive', 'danceability'];
+const modelNames = ['mood_happy', 'mood_sad', 'mood_relaxed', 'mood_aggressive', 'danceability'];
 let inferenceResultPromises = [];
 
 process.argv.forEach(function (val, index, array) {
     console.log(index + ': ' + val);
 });
 
-let finshedPredictions : any = {}
+let finshedPredictions: any = {}
 
 let wavesurfer;
 
@@ -56,44 +46,44 @@ export async function processImportAudio(url, id) {
     finshedPredictions.id = id
 
     let traclUrl = sound
-    if (sound == 'undefined' || sound == null){
+    if (sound == 'undefined' || sound == null) {
         traclUrl = url
         console.log({traclUrl: traclUrl})
         let res = await importFile(traclUrl)
-       return  res
+        return res
     }
 
-    if (sound !== null){
+    if (sound !== null) {
         console.log({traclUrl: traclUrl})
-      //  checkFileType(sound)
+        //  checkFileType(sound)
         let res = await importFile(traclUrl)
-        return  res
+        return res
     }
 
     return {
-        Error : sound + 'cannot be analyzed'
+        Error: sound + 'cannot be analyzed'
     }
 }
 
 createInferenceWorkers();
 
-async function importFile(file){
+async function importFile(file) {
     // @ts-ignore
     await fetch(file)
         .then((response) => {
-          if (response.status == 200 ){
-              return response.blob();
-          }
+            if (response.status == 200) {
+                return response.blob();
+            }
         })
         .then((blob) => {
             // @ts-ignore
             blob.arrayBuffer().then((ab) => {
-               return  decodeFile(ab);
+                return decodeFile(ab);
             })
         })
         .catch((err) => {
-            console.log({'FILE_NOT_FOUND' : err})
-            return ({'FILE_NOT_FOUND' : err})
+            console.log({'FILE_NOT_FOUND': err})
+            return ({'FILE_NOT_FOUND': err})
         });
 }
 
@@ -103,74 +93,45 @@ export async function analyzeMp3(file, id) {
     console.log({file})
 
     try {
-        let res =  await decodeArrayBuffer(arrayBuffer)
+        let res = await decodeArrayBuffer(arrayBuffer)
         let emptyDir = await clearAudioFile(file)
         emptyDir
 
         return res
-    }catch (e) {
+    } catch (e) {
         return JSON.stringify(e)
     }
 }
 
 async function clearAudioFile(file) {
-    let rmFile = await  fs.unlink(file, (err) => {
+    let rmFile = await fs.unlink(file, (err) => {
         if (err) throw err;
     });
     return rmFile
 }
 
 async function decodeArrayBuffer(arrayBuffer) {
-   let res = await audioCtx.decodeAudioData(arrayBuffer).then(async function handleDecodedAudio(audioBuffer) {
-
-        // console.log({
-        //     audioBuffer : {
-        //         length : audioBuffer.length,
-        //         duration : audioBuffer.duration,
-        //         numberOfChannels : audioBuffer.numberOfChannels,
-        //         sampleRate : audioBuffer.sampleRate
-        //     }
-        // })
-
+    let res = await audioCtx.decodeAudioData(arrayBuffer).then(async function handleDecodedAudio(audioBuffer) {
         console.info("Done decoding audio!");
 
         const prepocessedAudio = preprocess(audioBuffer);
         await audioCtx.suspend();
 
-        if (essentia) {
-            // let essentiaAnalysis = await computeKeyBPM(arrayBuffer);
-            // // @ts-ignore
-            // finshedPredictions.bpm = essentiaAnalysis.bpm
-            // // @ts-ignore
-            // finshedPredictions.key = essentiaAnalysis.keyData.key
-            // // @ts-ignore
-            // finshedPredictions.scale = essentiaAnalysis.keyData.scale
-            // finshedPredictions.energy = essentiaAnalysis.energy
-
-            // @ts-ignore
-            finshedPredictions.bpm = 0
-            // @ts-ignore
-            finshedPredictions.key = 0
-            // @ts-ignore
-            finshedPredictions.scale = 0
-            finshedPredictions.energy = 0
-        }
-
         // reduce amount of audio to analyse
         let audioData = shortenAudio(prepocessedAudio, KEEP_PERCENTAGE, true); // <-- TRIMMED start/end
 
-        let features =  await extraxtFeatures(audioData)
-       modelNames.forEach((n) => {
+        let features = await extraxtFeatures(audioData)
+        modelNames.forEach((n) => {
             // send features off to each of the models
             // @ts-ignore
             features.name = n
-            let  inference = inferenceProcessor({features})
+            let inference = inferenceProcessor({features})
 
             inference.then((res) => {
-                let preds = outputPredictions().predictions ;
+                let preds = outputPredictions().predictions;
 
                 inferenceResultPromises.push(new Promise((res) => {
-                    res({ [n]: preds });
+                    res({[n]: preds});
                 }));
 
                 outputPredictions().predictions = null
@@ -178,7 +139,7 @@ async function decodeArrayBuffer(arrayBuffer) {
             })
 
         });
-       audioData = null;
+        audioData = null;
     })
 
     return res;
@@ -188,10 +149,10 @@ function checkFileType(traclUrl) {
 
     var lastThree = traclUrl.substr(traclUrl.length - 3)
 
-    if (lastThree !== 'wav'){
-        let   msg = {
-            Error : 'Wrong file format',
-            message : 'Only .wav files can be analyzed'
+    if (lastThree !== 'wav') {
+        let msg = {
+            Error: 'Wrong file format',
+            message: 'Only .wav files can be analyzed'
         }
         console.log(msg)
         return msg;
@@ -200,42 +161,18 @@ function checkFileType(traclUrl) {
     return true;
 }
 
- async function decodeFile(arrayBuffer) {
+async function decodeFile(arrayBuffer) {
     try {
         return await audioCtx.resume().then(() => {
-           return  decodeArrayBuffer(arrayBuffer)
+            return decodeArrayBuffer(arrayBuffer)
         })
-    }catch (e) {
+    } catch (e) {
         return JSON.stringify(e)
     }
 }
 
-async function computeKeyBPM (arrayBuffer) {
-    let audio = wav.decode(arrayBuffer);
-    let vectorSignal = essentia.arrayToVector(audio.channelData[0]);
-
-/*    console.log({
-        ptsr : vectorSignal.$$.ptr,
-        count : vectorSignal.$$.count.value,
-        ptrName : vectorSignal.$$.ptrType.name,
-      //  ptrType : vectorSignal.$$.ptrType,
-       // vectorSignal : vectorSignal.$$,
-    })*/
-    
-    const keyData = await essentia.KeyExtractor(vectorSignal, true, 4096, 4096, 12, 3500, 60, 25, 0.2, 'bgate', 16000, 0.0001, 440, 'cosine', 'hann');
-    const bpm = await essentia.PercivalBpmEstimator(vectorSignal, 1024, 2048, 128, 128, 210, 50, 16000).bpm;
-    const energy = await essentia.Energy(vectorSignal).energy
-    
-    console.log({bpm, keyData, energy})
-    return {
-        keyData: keyData,
-        bpm: bpm,
-        energy : energy
-    };
-}
-
 async function createFeatureExtractionWorker(features) {
-   await modelNames.forEach((n) => {
+    await modelNames.forEach((n) => {
         // send features off to each of the models
         features.name = n
         return inferenceProcessor({features})
@@ -245,7 +182,7 @@ async function createFeatureExtractionWorker(features) {
 
 function createInferenceWorkers() {
     modelNames.forEach((n) => {
-       return inferenceProcessor({
+        return inferenceProcessor({
             name: n
         })
     });
@@ -255,15 +192,14 @@ async function collectPredictions() {
 
     const allPredictions = {};
     let finishedResults = {}
-    
-    if (inferenceResultPromises.length == modelNames.length ) {
+
+    if (inferenceResultPromises.length == modelNames.length) {
 
         // @ts-ignore
         Promise.all(inferenceResultPromises, allPredictions).then(async (predictions) => {
 
             Object.assign(allPredictions, ...predictions);
             finishedResults = {...allPredictions, ...finshedPredictions};
-
 
             // @ts-ignore
             finshedPredictions = {
@@ -291,21 +227,52 @@ async function collectPredictions() {
 
 async function sendClssificationResults() {
     console.log({
-        before_request : finshedPredictions,
+        before_request: finshedPredictions,
     })
 
-    let request = new ClassifierRequest()
-    request.sendClassificatioon(finshedPredictions)
-    let res = await finshedPredictions;
-   return  res
+    // update song with finished predictions using the id
+    // make a put request to url = http://localhost:8899/api/songs/:id using fetch
+    // @ts-ignore
+    let body = prepareData(finshedPredictions)
+    let res = await fetch(`http://mage.tech:8899/api/songs/${finshedPredictions.id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: body
+    })
+
+    let response = await res.json()
+    console.log(
+        {
+            after_request: {
+                ...res
+            }
+        },
+        response
+    )
+    return response
 }
 
-function dd(msg = null){
+// prepare data for request
+function prepareData(payload) {
+    return JSON.stringify({
+        "analyzed": true,
+        "status": "analyzed",
+        "danceability": payload.danceability,
+        "happy": payload.mood_happy,
+        "sad": payload.mood_sad,
+        "relaxed": payload.mood_relaxed,
+        "aggressiveness": payload.mood_aggressive
+    });
+}
+
+function dd(msg = null) {
     console.info({
-        msg : msg,
-        location : 'You are Here now'
+        msg: msg,
+        location: 'You are Here now'
     })
 
     console.log('*+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-    return  process.exit(0);
+    return process.exit(0);
 }
