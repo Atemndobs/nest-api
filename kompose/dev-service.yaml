@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f ../docker-compose.yml
+    kompose.version: 1.28.0 (c4137012e)
+  labels:
+    io.kompose.service: dev
+  name: dev
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      nodePort: 30202
+    - name: debug
+      port: 9229
+      targetPort: 9229
+      nodePort: 31840
+  selector:
+    io.kompose.service: dev

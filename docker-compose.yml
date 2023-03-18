@@ -1,38 +1,16 @@
-version: '3'
+version: '3.7'
 
 services:
-    api:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            args:
-                - NODE_ENV=development
-        environment:
-            - PORT=3000
-            - DB_HOST=postgres
-            - DB_PORT=5432
-            - DB_USER=postgres
-            - DB_PW=crudjs
+    dev:
+        container_name: nestjs_api_prod
+        image: atemndobs/nestjs_api_prod:v2
+        command: ["sh", "-c", "npm run start"]
         ports:
             - 3000:3000
-        depends_on:
-            - postgres
-        links:
-            - postgres:postgres
-        volumes:
-            - .:/usr/src/app
-            - /usr/src/app/node_modules
-        command: npm run dev
-
-    postgres:
-        image: postgres:alpine
+            - 9229:9229
         restart: always
-        environment:
-            - DB_USER=postgres
-            - DB_PASS=crudjs
-
-    adminer:
-        image: adminer
-        restart: always
-        ports:
-            - 8080:8080
+#        volumes:
+#            - .:/usr/src/app
+networks:
+    default:
+        name: laravel_sail

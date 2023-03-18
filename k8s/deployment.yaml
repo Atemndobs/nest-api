@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nest-app
+  namespace: curator
+spec:
+  selector:
+    app: nest-app
+  ports:
+  - name: http
+    protocol: TCP
+    port: 3000
+    targetPort: 3000
+    nodePort: 31200 
+  - name: debug
+    protocol: TCP
+    port: 9229
+    targetPort: 9229
+  type: LoadBalancer
+    # Set the fixed port for the LoadBalancer service
+ # loadBalancerIP: <your-external-IP>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nest-app
+  namespace: curator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nest-app
+  template:
+    metadata:
+      labels:
+        app: nest-app
+    spec:
+      containers:
+      - name: nest-app
+        image: atemndobs/nestjs_api_prod:v2
+        command: ["sh", "-c", "npm run start"]
+        ports:
+        - containerPort: 3000
+        - containerPort: 9229
+        imagePullPolicy: Always

@@ -37,7 +37,19 @@ export class MusicController {
 
     @Get('update')
     updateTrack(@Query() query) {
-        let url = 'http://mage.tech:8899/api/songs/'+ query.id
+
+        let home = process.env.HOME
+        let pwd = process.env.PWD
+        let base_url = process.env.SONG_BASE_URL
+
+        if (home == "/home/atem"){
+            base_url = process.env.SONG_BASE_URL
+        }
+        if (home == "/root" && pwd == "/usr/src/app"){
+            base_url = process.env.SONG_BASE_URL_DOCKER
+        }
+
+        let url = base_url + '/api/songs/'+ query.id
 
         console.log({query})
 
@@ -103,6 +115,7 @@ export class MusicController {
 
     @Get(':image')
     getImage(@Param('image') image, @Res() res) : Observable<object> {
+        console.log('*********************************GETING IMAGE*********************************')
         let file_path = './src/images/' + image
 
         let imagePath = fs.realpathSync(file_path)

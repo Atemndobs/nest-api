@@ -229,12 +229,22 @@ async function sendClssificationResults() {
     console.log({
         before_request: finshedPredictions,
     })
+    let home = process.env.HOME
+    let pwd = process.env.PWD
+    let base_url = process.env.SONG_BASE_URL
+
+    if (home == "/home/atem"){
+        base_url = process.env.SONG_BASE_URL
+    }
+    if (home == "/root" && pwd == "/usr/src/app"){
+        base_url = process.env.SONG_BASE_URL_DOCKER
+    }
 
     // update song with finished predictions using the id
     // make a put request to url = http://localhost:8899/api/songs/:id using fetch
     // @ts-ignore
     let body = prepareData(finshedPredictions)
-    let res = await fetch(`http://mage.tech:8899/api/songs/${finshedPredictions.id}`, {
+    let res = await fetch(`${base_url}/api/songs/${finshedPredictions.id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'

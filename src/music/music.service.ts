@@ -47,12 +47,6 @@ export class MusicService {
 
         const key = await sckey.fetchKey();
         const test = await sckey.testKey(key);
-        //        // sckey.fetchKey().then(key => {
-        //         //     console.log(key)
-        //         // });
-        //
-        //         let key = 'V7svIpMdrs2xmRhQStZz66WxBo0YqVqe'
-
         if (test) {
             return key
         }

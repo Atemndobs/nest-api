@@ -1,18 +1,19 @@
-import { Injectable } from '@nestjs/common';
-import {processImportAudio, analyzeMp3} from './start'
-import {ConvertService} from "./convert/convert.service";
-import { Global } from '@nestjs/common';
-import { spawn } from 'child_process';
+import {Injectable, Logger} from '@nestjs/common';
+import {analyzeMp3, processImportAudio} from './start'
 import * as fs from 'fs';
 import {PythonShell} from 'python-shell';
 import axios from 'axios';
-import * as url from "url";
 import {createParsedTrack} from "./MainProcess/core/createParsedTrack";
+
+require('dotenv').config();
 
 @Injectable()
 export class AppService {
+    logger = Logger;
+    constructor() {
+        this.logger = new Logger('AppService');
+    }
   getHello(): string {
-    return 'Hello Danm!';
     return 'Hello Danm!';
   }
 
@@ -22,9 +23,28 @@ export class AppService {
     }
  async getClassifier(track : string) : Promise <any> {
    return await this.getSongByTitle(track).then((res) => {
+       // SONG_BASE_URL_PROD
+       let base_url = process.env.SONG_BASE_URL
        let id = res.id
        let path = res.path
        let url = path
+       let home = process.env.HOME
+       let pwd = process.env.PWD
+       this.logger.debug('BEFORE CONVERTING ===============================================')
+
+       this.logger.debug({
+           home, pwd
+       })
+
+       if (home == "/home/atem"){
+           base_url = process.env.SONG_BASE_URL
+       }
+       if (home == "/root" && pwd == "/usr/src/app"){
+           base_url = process.env.SONG_BASE_URL_DOCKER
+       }
+
+       this.logger.debug([base_url, id, path, url, home, pwd])
+       this.logger.debug("BEFORE CONVERTING=====================================================================BEFORE CONVERTING")
 
        if (! this.checkFileType(track)){
 
@@ -50,10 +70,10 @@ export class AppService {
                    }
                });
                newUrl.end(function (err,code,signal) {
-                   console.log({err})
-                   console.log('The exit code was: ' + code);
-                   console.log('The exit signal was: ' + signal);
-                   console.log('finished');
+                   this.logger.debug({err})
+                   this.logger.debug('The exit code was: ' + code);
+                   this.logger.debug('The exit signal was: ' + signal);
+                   this.logger.debug('finished');
                });
            }catch (e) {
                return {error : e.message}
@@ -71,16 +91,27 @@ export class AppService {
   }
 
     getSongByTitle(track) : Promise<any> {
+        let home = process.env.HOME
+        let pwd = process.env.PWD
+        let base_url = process.env.SONG_BASE_URL
+
+        if (home == "/home/atem"){
+            base_url = process.env.SONG_BASE_URL
+        }
+        if (home == "/root" && pwd == "/usr/src/app"){
+            base_url = process.env.SONG_BASE_URL_DOCKER
+        }
       var config = {
           method: 'get',
-          url: `http://mage.tech:8899/api/classify/song/?slug=${track}`,
+          url: `${base_url}/api/classify/song/?slug=${track}`,
           headers: { }
       };
+
       let self = this
       // @ts-ignore
       return axios(config)
           .then(function (response) {
-               console.log(JSON.stringify(response.data));
+               this.logger.debug(JSON.stringify(response.data));
               if (response.status != 200){
                   return {
                       error : response.data
@@ -89,7 +120,7 @@ export class AppService {
               return response.data
           })
           .catch(function (error) {
-              console.log(error.message);
+              this.logger.debug(error.message);
               return {error : error.message}
           });
   }
@@ -100,14 +131,18 @@ export class AppService {
             args : ["--song", `${path}`, "--name", `${mp3File}`]
         }
 
+        this.logger.debug('INSIDE  CONVERTING ================================INSIDE');
+
+        this.logger.debug({options})
+
         let wav ;
         let self = this
         return PythonShell.run('./src/convert.py', options, function (err, res) {
 
             if (err) {
-                console.log({err});
+                this.logger.debug({err});
             }else {
-                console.log(`succefully converted ${mp3File} to ${mp3}.wav`);
+                this.logger.debug(`successfully converted ${mp3File} to ${mp3}.wav`);
                 let wavFile = `${mp3}.wav`
                 wav = `./src/audio/${mp3}.wav`
 
@@ -122,8 +157,8 @@ export class AppService {
 
       let trackDetails = await createParsedTrack(file)
         this.updateSongProperties(trackDetails, id)
-        console.log('BEFORE UPDATING SONG TO DB')
-        console.log({trackDetails})
+        this.logger.debug('BEFORE UPDATING SONG TO DB')
+        this.logger.debug({trackDetails})
 
         let rmFile = await fs.unlink(file, (err) => {
             if (err) throw err;
@@ -139,7 +174,7 @@ export class AppService {
                 Error : 'Wrong file format',
                 message : 'Only .wav files can be analyzed'
             }
-            console.log(msg)
+            this.logger.debug(msg)
             return false;
         }
         return true;
@@ -170,13 +205,13 @@ export class AppService {
         };
         let url =  "http://localhost:8899/api/songs/"+id
 
-        console.log('BEFORE POST')
-        console.log(data)
+        this.logger.debug('BEFORE POST')
+        this.logger.debug(data)
 
       return axios.put(url, {data}).then((res) => {
 
       }).catch((err) => {
-          console.log(err.message)
+          this.logger.debug(err.message)
       })
     }
 }
@@ -187,6 +222,6 @@ function dd(msg = null){
         location : 'You are Here now'
     })
 
-    console.log('*+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+    this.logger.debug('*+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
     return  process.exit(0);
 }

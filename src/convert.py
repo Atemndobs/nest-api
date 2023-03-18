@@ -19,6 +19,7 @@ print(sys.argv[3])
 print(sys.argv[4])
 
 url = sys.argv[2]
+url = url.replace('mage.tech:8899', 'nginx')
 file_name = "./src/audio/"  + sys.argv[4]
 
 res = requests.get(url, stream = True)

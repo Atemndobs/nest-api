@@ -54,7 +54,7 @@ async function initModel(name) {
 
 function getModelURL(name) {
     let essentai_path = `https://mtg.github.io/essentia.js/examples/demos/mood-classifiers/models/${name}-musicnn-msd-2/model.json`
-   // let essentai_path = `http://mage.tech:8899/storage/models/${name}-musicnn-msd-2/model.json`
+   // let essentai_path = `http://nginx/storage/models/${name}-musicnn-msd-2/model.json`
     return essentai_path;
 }
 
