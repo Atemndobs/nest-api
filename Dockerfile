@@ -21,4 +21,4 @@ RUN npm run build
 COPY ./src/images ./dist/images
 
 RUN npm install pm2 -g
-RUN pm2 start dist/main.js
+RUN pm2 start dist/main.js --name nest
