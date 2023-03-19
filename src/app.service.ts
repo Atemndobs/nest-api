@@ -9,8 +9,9 @@ require('dotenv').config();
 
 @Injectable()
 export class AppService {
-    logger = Logger;
+    logger : Logger;
     constructor() {
+        // @ts-ignore
         this.logger = new Logger('AppService');
     }
   getHello(): string {
@@ -32,7 +33,7 @@ export class AppService {
        let pwd = process.env.PWD
        this.logger.debug('BEFORE CONVERTING ===============================================')
 
-       this.logger.debug({
+       console.log({
            home, pwd
        })
 
@@ -44,7 +45,7 @@ export class AppService {
        }
 
        this.logger.debug([base_url, id, path, url, home, pwd])
-       this.logger.debug("BEFORE CONVERTING=====================================================================BEFORE CONVERTING")
+       console.log("BEFORE CONVERTING=====================================================================BEFORE CONVERTING")
 
        if (! this.checkFileType(track)){
 
@@ -70,10 +71,10 @@ export class AppService {
                    }
                });
                newUrl.end(function (err,code,signal) {
-                   this.logger.debug({err})
-                   this.logger.debug('The exit code was: ' + code);
-                   this.logger.debug('The exit signal was: ' + signal);
-                   this.logger.debug('finished');
+                   self.logger.debug({err})
+                   console.log('The exit code was: ' + code);
+                   console.log('The exit signal was: ' + signal);
+                   console.log('finished');
                });
            }catch (e) {
                return {error : e.message}
@@ -111,7 +112,7 @@ export class AppService {
       // @ts-ignore
       return axios(config)
           .then(function (response) {
-               this.logger.debug(JSON.stringify(response.data));
+               console.log(JSON.stringify(response.data));
               if (response.status != 200){
                   return {
                       error : response.data
@@ -120,7 +121,7 @@ export class AppService {
               return response.data
           })
           .catch(function (error) {
-              this.logger.debug(error.message);
+              console.log(error.message);
               return {error : error.message}
           });
   }
@@ -131,18 +132,18 @@ export class AppService {
             args : ["--song", `${path}`, "--name", `${mp3File}`]
         }
 
-        this.logger.debug('INSIDE  CONVERTING ================================INSIDE');
+        console.log('INSIDE  CONVERTING ================================INSIDE');
 
-        this.logger.debug({options})
+        console.log({options})
 
         let wav ;
         let self = this
         return PythonShell.run('./src/convert.py', options, function (err, res) {
 
             if (err) {
-                this.logger.debug({err});
+                console.log({err});
             }else {
-                this.logger.debug(`successfully converted ${mp3File} to ${mp3}.wav`);
+                console.log(`successfully converted ${mp3File} to ${mp3}.wav`);
                 let wavFile = `${mp3}.wav`
                 wav = `./src/audio/${mp3}.wav`
 
@@ -157,8 +158,8 @@ export class AppService {
 
       let trackDetails = await createParsedTrack(file)
         this.updateSongProperties(trackDetails, id)
-        this.logger.debug('BEFORE UPDATING SONG TO DB')
-        this.logger.debug({trackDetails})
+        console.log('BEFORE UPDATING SONG TO DB')
+        console.log({trackDetails})
 
         let rmFile = await fs.unlink(file, (err) => {
             if (err) throw err;
@@ -174,7 +175,7 @@ export class AppService {
                 Error : 'Wrong file format',
                 message : 'Only .wav files can be analyzed'
             }
-            this.logger.debug(msg)
+            console.log(msg)
             return false;
         }
         return true;
@@ -205,13 +206,13 @@ export class AppService {
         };
         let url =  "http://localhost:8899/api/songs/"+id
 
-        this.logger.debug('BEFORE POST')
-        this.logger.debug(data)
+        console.log('BEFORE POST')
+        console.log(data)
 
       return axios.put(url, {data}).then((res) => {
 
       }).catch((err) => {
-          this.logger.debug(err.message)
+          console.log(err.message)
       })
     }
 }
@@ -222,6 +223,6 @@ function dd(msg = null){
         location : 'You are Here now'
     })
 
-    this.logger.debug('*+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+    console.log('*+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
     return  process.exit(0);
 }
