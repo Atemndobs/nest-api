@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import {PythonShell} from 'python-shell';
 import axios from 'axios';
 import {createParsedTrack} from "./MainProcess/core/createParsedTrack";
+import {json} from "express";
 
 require('dotenv').config();
 
@@ -23,6 +24,7 @@ export class AppService {
         return {status: 'Working !!'}
     }
  async getClassifier(track : string) : Promise <any> {
+      //  let self = this
    return await this.getSongByTitle(track).then((res) => {
        // SONG_BASE_URL_PROD
        let base_url = process.env.SONG_BASE_URL
@@ -84,6 +86,7 @@ export class AppService {
            try {
                processImportAudio(url, id)
            }catch (e) {
+               this.logger.error(e.message)
                return {error : e.message}
            }
        }
@@ -112,8 +115,9 @@ export class AppService {
       // @ts-ignore
       return axios(config)
           .then(function (response) {
-               console.log(JSON.stringify(response.data));
+               self.logger.log(JSON.stringify(response.data));
               if (response.status != 200){
+                  self.logger.error(JSON.stringify(response.data));
                   return {
                       error : response.data
                   }
@@ -121,7 +125,7 @@ export class AppService {
               return response.data
           })
           .catch(function (error) {
-              console.log(error.message);
+              self.logger.error(JSON.stringify(error));
               return {error : error.message}
           });
   }
@@ -133,17 +137,16 @@ export class AppService {
         }
 
         console.log('INSIDE  CONVERTING ================================INSIDE');
-
-        console.log({options})
+        this.logger.debug(JSON.stringify(options));
 
         let wav ;
         let self = this
         return PythonShell.run('./src/convert.py', options, function (err, res) {
 
             if (err) {
-                console.log({err});
+                self.logger.error(err);
             }else {
-                console.log(`successfully converted ${mp3File} to ${mp3}.wav`);
+                self.logger.debug(`successfully converted ${mp3File} to ${mp3}.wav`);
                 let wavFile = `${mp3}.wav`
                 wav = `./src/audio/${mp3}.wav`
 
