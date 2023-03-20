@@ -46,7 +46,14 @@ export class AppService {
            base_url = process.env.SONG_BASE_URL_DOCKER
        }
 
-       this.logger.debug([base_url, id, path, url, home, pwd])
+       this.logger.debug({
+           base_url,
+           id,
+           path,
+           url,
+           home,
+           pwd
+       })
        console.log("BEFORE CONVERTING=====================================================================BEFORE CONVERTING")
 
        if (! this.checkFileType(track)){
@@ -73,7 +80,7 @@ export class AppService {
                    }
                });
                newUrl.end(function (err,code,signal) {
-                   self.logger.debug({err})
+                   self.logger.debug({err,})
                    console.log('The exit code was: ' + code);
                    console.log('The exit signal was: ' + signal);
                    console.log('finished');
