@@ -53,12 +53,8 @@ async function initModel(name) {
 }
 
 function getModelURL(name) {
-   // let file = fs.readFileSync(`./src/models/${name}-musicnn-msd-2/model.json`, 'utf8')
-    //    let file_path = pathToFileURL(`./src/models/${name}-musicnn-msd-2/model.json`)
-    //'file:///home/atem/sites/curator/nested/src/models/mood_happy-musicnn-msd-2/model.json'
-// http://mage.tech:8899/storage/models/danceability-musicnn-msd-2/model.json
- //   let essentai_path = `https://mtg.github.io/essentia.js/examples/demos/mood-classifiers/models/${name}-musicnn-msd-2/model.json`
-    let essentai_path = `http://mage.tech:8899/storage/models/${name}-musicnn-msd-2/model.json`
+    let essentai_path = `https://mtg.github.io/essentia.js/examples/demos/mood-classifiers/models/${name}-musicnn-msd-2/model.json`
+   // let essentai_path = `http://nginx/storage/models/${name}-musicnn-msd-2/model.json`
     return essentai_path;
 }
 
@@ -99,22 +95,7 @@ async function initTensorflowWASM(name) {
     }
 }
 
-
-/*export async function outputPredictions(p = null) {
-    console.log({OUTPUT_PRED___: pred})
-
-
-    if (Object.keys(pred).length != 0){
-        const res = await p ?? pred
-        return {
-            predictions: res
-        };
-    }
-
-}*/
-
 export function outputPredictions() {
-  //  console.log({OUTPUT_PRED___: pred})
      return {
         predictions: pred
     };
@@ -144,20 +125,8 @@ async function modelPredict(features, name) {
         const newModel = await new EssentiaModel.TensorflowMusiCNN(tf, getModelURL(name));
 
         await newModel.initialize()
-/*        console.log({
-            modelReady: modelReady,
-            modelLoaded : modelLoaded,
-            modelName : name
-        })*/
-
         await newModel.predict(features, true).then((predictions) => {
-
-/*            console.log({
-                modelName : name,
-                modelTagOrder_0 : modelTagOrder[name][0],
-                modelTagOrder_1 : modelTagOrder[name][1]
-            })*/
-
+            
             const summarizedPredictions = twoValuesAverage(predictions);
             // format predictions, grab only positive one
             const results = summarizedPredictions.filter((_, i) => modelTagOrder[name][i])[0];
@@ -196,7 +165,6 @@ export async function inferenceProcessor(data) {
         return res;
     }
 }
-
 
 
 function dd(msg = null){

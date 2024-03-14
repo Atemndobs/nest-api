@@ -1,16 +1,20 @@
-import { Injectable } from '@nestjs/common';
-import {processImportAudio, analyzeMp3} from './start'
-import {ConvertService} from "./convert/convert.service";
-import { Global } from '@nestjs/common';
-import { spawn } from 'child_process';
+import {Injectable, Logger} from '@nestjs/common';
+import {analyzeMp3, processImportAudio} from './start'
 import * as fs from 'fs';
 import {PythonShell} from 'python-shell';
 import axios from 'axios';
-import * as url from "url";
+import {createParsedTrack} from "./MainProcess/core/createParsedTrack";
+import {json} from "express";
 
+require('dotenv').config();
 
 @Injectable()
 export class AppService {
+    logger : Logger;
+    constructor() {
+        // @ts-ignore
+        this.logger = new Logger('AppService');
+    }
   getHello(): string {
     return 'Hello Danm!';
   }
@@ -19,13 +23,38 @@ export class AppService {
         Object.keys(require.cache).forEach(function(key) { delete require.cache[key] })
         return {status: 'Working !!'}
     }
-
  async getClassifier(track : string) : Promise <any> {
+      //  let self = this
    return await this.getSongByTitle(track).then((res) => {
-
+       // SONG_BASE_URL_PROD
+       let base_url = process.env.SONG_BASE_URL
        let id = res.id
        let path = res.path
        let url = path
+       let home = process.env.HOME
+       let pwd = process.env.PWD
+       this.logger.debug('BEFORE CONVERTING ===============================================')
+
+       console.log({
+           home, pwd
+       })
+
+       if (home == "/home/atem"){
+           base_url = process.env.SONG_BASE_URL
+       }
+       if (home == "/root" && pwd == "/usr/src/app"){
+           base_url = process.env.SONG_BASE_URL_DOCKER
+       }
+
+       this.logger.debug({
+           base_url,
+           id,
+           path,
+           url,
+           home,
+           pwd
+       })
+       console.log("BEFORE CONVERTING=====================================================================BEFORE CONVERTING")
 
        if (! this.checkFileType(track)){
 
@@ -36,21 +65,22 @@ export class AppService {
                newUrl.on('message', function (message) {
                    if (message.toString().includes('wav')){
                        let checked_path =  message
+
                        if (fs.existsSync(checked_path)) {
                            let pred = analyzeMp3(checked_path, id)
 
                            let originalFile = `./src/audio/${track}`
-                           console.log('AFTRER CONVERT')
-                           self.deleteMp3(originalFile)
+                           self.deleteMp3(originalFile, id)
 
                            return pred;
+
                        }else {
                            return 'PROCESS FAILED'
                        }
                    }
                });
                newUrl.end(function (err,code,signal) {
-                   console.log({err})
+                   self.logger.debug({err,})
                    console.log('The exit code was: ' + code);
                    console.log('The exit signal was: ' + signal);
                    console.log('finished');
@@ -63,6 +93,7 @@ export class AppService {
            try {
                processImportAudio(url, id)
            }catch (e) {
+               this.logger.error(e.message)
                return {error : e.message}
            }
        }
@@ -71,16 +102,29 @@ export class AppService {
   }
 
     getSongByTitle(track) : Promise<any> {
+        let home = process.env.HOME
+        let pwd = process.env.PWD
+        let base_url = process.env.SONG_BASE_URL
+
+        if (home == "/home/atem"){
+            base_url = process.env.SONG_BASE_URL
+        }
+        if (home == "/root" && pwd == "/usr/src/app"){
+            base_url = process.env.SONG_BASE_URL_DOCKER
+        }
       var config = {
           method: 'get',
-          url: `http://127.0.0.1:8899/api/classify/song/?title=${track}`,
+          url: `${base_url}/api/classify/song/?slug=${track}`,
           headers: { }
       };
+
+      let self = this
       // @ts-ignore
       return axios(config)
           .then(function (response) {
-               console.log(JSON.stringify(response.data));
+               self.logger.log(JSON.stringify(response.data));
               if (response.status != 200){
+                  self.logger.error(JSON.stringify(response.data));
                   return {
                       error : response.data
                   }
@@ -88,7 +132,7 @@ export class AppService {
               return response.data
           })
           .catch(function (error) {
-              console.log(error.message);
+              self.logger.error(JSON.stringify(error));
               return {error : error.message}
           });
   }
@@ -99,34 +143,41 @@ export class AppService {
             args : ["--song", `${path}`, "--name", `${mp3File}`]
         }
 
+        console.log('INSIDE  CONVERTING ================================INSIDE');
+        this.logger.debug(JSON.stringify(options));
+
         let wav ;
-       let self = this
-        return  PythonShell.run('./src/convert.py', options, function (err, res) {
+        let self = this
+        return PythonShell.run('./src/convert.py', options, function (err, res) {
 
             if (err) {
-                console.log(err);
+                self.logger.error(err);
             }else {
-                console.log(`succefully converted ${mp3File} to ${mp3}.wav`);
+                self.logger.debug(`successfully converted ${mp3File} to ${mp3}.wav`);
                 let wavFile = `${mp3}.wav`
                 wav = `./src/audio/${mp3}.wav`
 
                 let originalFile = `./src/audio/${mp3File}`
-                console.log('AFTRER CONVERT')
-                self.deleteMp3(originalFile)
-                console.log({wav})
             }
-
             return wav
-        });
+        })
+
 
   }
-    deleteMp3(file) {
 
-        let rmFile =  fs.unlink(file, (err) => {
+
+    async  deleteMp3(file, id) {
+
+      let trackDetails = await createParsedTrack(file)
+        this.updateSongProperties(trackDetails, id)
+        console.log('BEFORE UPDATING SONG TO DB')
+        console.log({trackDetails})
+
+        let rmFile = await fs.unlink(file, (err) => {
             if (err) throw err;
         });
 
-        return rmFile
+        return trackDetails
     }
   
     checkFileType(traclUrl) {
@@ -156,6 +207,25 @@ export class AppService {
             }
         });
         return rmDir
+    }
+
+    updateSongProperties( file : any, id : bigint) : any {
+        let data = {
+            author : file.artist ?? file.extractedArtist ?? file.extractedTitle ??file.defaultTitle,
+            image  : file.albumArt,
+            comment : file.extractedTitle
+
+        };
+        let url =  "http://localhost:8899/api/songs/"+id
+
+        console.log('BEFORE POST')
+        console.log(data)
+
+      return axios.put(url, {data}).then((res) => {
+
+      }).catch((err) => {
+          console.log(err.message)
+      })
     }
 }
 

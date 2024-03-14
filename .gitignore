@@ -2,3 +2,7 @@ node_modules
 dist
 .vscode
 dist_old
+--name
+/src/audio/
+/src/images/
+/src/img/

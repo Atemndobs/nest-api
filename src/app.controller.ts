@@ -2,11 +2,16 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 import Mp32Wav from 'mp3-to-wav'
 import * as stream from "stream";
+import * as http from "http";
 
+import axios from "axios";
+import fs from "fs"
+import {createParsedTrack} from "./MainProcess/core/createParsedTrack";
 
 @Controller('song')
 export class AppController {
   constructor(private readonly appService: AppService) {}
+
 
   @Get()
   getHello(): any {
@@ -38,15 +43,13 @@ export class AppController {
       prediction.track = track
       return await prediction;
   }
+}
 
+function dd(msg = null){
+    console.info({
+        msg : msg,
+    })
 
-    dd(msg = null){
-        console.info({
-            msg : msg,
-        })
-
-        console.log('*+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-        return  process.exit(0);
-    }
-
+    console.log('*+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+    return  process.exit(0);
 }
