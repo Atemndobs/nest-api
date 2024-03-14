@@ -16,7 +16,7 @@ RUN npm install --force --unsafe-perm
 
 COPY . .
 RUN npm run build
-COPY ./src/images ./dist/images
+# COPY ./src/images ./dist/images
 
 #COPY ./dist ./dist
 #COPY ./.env ./.env
