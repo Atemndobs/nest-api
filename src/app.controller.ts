@@ -12,6 +12,7 @@ import {createParsedTrack} from "./MainProcess/core/createParsedTrack";
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
+
   @Get()
   getHello(): any {
      return this.appService.healthCheck();

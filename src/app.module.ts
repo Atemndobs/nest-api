@@ -8,11 +8,11 @@ import { join } from 'path';
 
 @Module({
   imports: [
-      MusicModule,
+    MusicModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '.', 'images'),
       // exclude: ['/api*'],
-    }),
+    })
   ],
   controllers: [AppController],
   providers: [AppService, ConvertService],

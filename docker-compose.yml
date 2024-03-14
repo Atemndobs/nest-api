@@ -6,7 +6,7 @@ services:
         image: atemndobs/nestjs_api_prod:v2.1.0
         command: ["sh", "-c", "npm run start"]
         ports:
-            - 3000:3000
+            - 3200:3000
             - 9229:9229
         restart: always
 #        volumes:
@@ -14,3 +14,4 @@ services:
 networks:
     default:
         name: laravel_sail
+        external: true

@@ -104,6 +104,19 @@ export class MusicController {
     @Get('soundcloud')
     getSoundCloud(@Query() query) {
 
+        console.log('*********************************GETING IMAGE*********************************')
+        let url = query.song
+        this.musicService.scrapeSoundCloudSong(url)
+
+        return {
+            status : 'Done',
+            url
+        };
+    }
+
+    @Get('sound')
+    getSound(@Query() query) {
+
         let url = query.song
         this.musicService.scrapeSoundCloudSong(url)
 
@@ -120,6 +133,17 @@ export class MusicController {
 
         let imagePath = fs.realpathSync(file_path)
         return of(res.sendFile(imagePath ))
+    }
+
+    @Get('auth')
+    getSpotifyAuth(@Query() query) {
+        console.log('*********************************GETING IMAGE*********************************')
+
+        let url = query.song
+        return {
+            status : 'Done',
+            url
+        };
     }
 
 }

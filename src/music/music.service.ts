@@ -78,4 +78,8 @@ export class MusicService {
         console.log("Downloading...done")
     }
 
+    getSpotifyAuth() {
+        // call python webbrowser to open spotify auth page
+        // return token from callback
+    }
 }

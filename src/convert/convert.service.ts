@@ -29,7 +29,7 @@ export class ConvertService {
             });
 
         } catch (e) {
-            console.log("Error occurred while converting : ", e);
+            console.log("Error occurred while converting : ", {e});
         }
     }
 
